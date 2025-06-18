@@ -1,4 +1,5 @@
 import "./App.css";
+import UploadMultipleFile from "./components/UploadMultipleFile";
 import UploadSingleFile from "./components/UploadSingleFile";
 import Counter from "./views/Counter";
 import ListProduct from "./views/ListProduct";
@@ -8,7 +9,8 @@ function App() {
     <>
       {/* <Counter /> */}
       {/* <ListProduct /> */}
-      <UploadSingleFile />
+      {/* <UploadSingleFile /> */}
+      <UploadMultipleFile />
     </>
   );
 }
