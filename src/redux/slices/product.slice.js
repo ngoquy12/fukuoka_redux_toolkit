@@ -1,5 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllProduct, removeProduct } from "../../apis/product.api";
+import {
+  createProduct,
+  getAllProduct,
+  removeProduct,
+} from "../../apis/product.api";
 
 const initialState = {
   status: "idle",
@@ -27,9 +31,15 @@ const productSlice = createSlice({
       state.status = "rejected";
       state.error = action.error.message;
     });
+    // Cập nhật Store sau khi xóa
     builder.addCase(removeProduct.fulfilled, (state, action) => {
       // Cập nhật mảng sau khi xóa 1 sản phẩm
       state.data = state.data.filter((pro) => pro.id !== action.payload); // action.payload là id được trả về từ hàm removeProduct, state.data là mảng product ban đầu
+    });
+    // Cập nhật Store sau khi thêm mới
+    builder.addCase(createProduct.fulfilled, (state, action) => {
+      // Cập nhật lại state
+      state.data.unshift(action.payload);
     });
   },
 });

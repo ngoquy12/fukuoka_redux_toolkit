@@ -2,6 +2,9 @@ import { Button } from "antd";
 import axios, { HttpStatusCode } from "axios";
 import React, { useState } from "react";
 
+const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_UPLOAD_PRESET;
+
 export default function UploadSingleFile() {
   const [file, setFile] = useState(null); // Giá trị trong input type file
   const [imagePreview, setImagePreview] = useState(""); // Link hình ảnh preview
@@ -32,8 +35,8 @@ export default function UploadSingleFile() {
     const formData = new FormData();
 
     formData.append("file", file);
-    formData.append("upload_preset", "fukuoka_upload");
-    formData.append("cloud_name", "ngovanquy");
+    formData.append("upload_preset", UPLOAD_PRESET);
+    formData.append("cloud_name", CLOUD_NAME);
 
     // Bước 3: Gọi API upload tài nguyên
     try {
@@ -41,7 +44,7 @@ export default function UploadSingleFile() {
       setIsUploading(true);
 
       const response = await axios.post(
-        "https://api.cloudinary.com/v1_1/ngovanquy/image/upload",
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
         formData
       );
 

@@ -3,6 +3,9 @@ import React, { useState } from "react";
 import { CloseOutlined } from "@ant-design/icons";
 import axios, { HttpStatusCode } from "axios";
 
+const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_UPLOAD_PRESET;
+
 export default function UploadMultipleFile() {
   const [files, setFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -61,11 +64,11 @@ export default function UploadMultipleFile() {
         const formData = new FormData();
 
         formData.append("file", file);
-        formData.append("upload_preset", "fukuoka_upload");
-        formData.append("cloud_name", "ngovanquy");
+        formData.append("upload_preset", UPLOAD_PRESET);
+        formData.append("cloud_name", CLOUD_NAME);
 
         const response = await axios.post(
-          "https://api.cloudinary.com/v1_1/ngovanquy/image/upload",
+          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
           formData
         );
 

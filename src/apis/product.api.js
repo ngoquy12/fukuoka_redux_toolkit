@@ -1,19 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "../utils/http";
 
 /**
  * Hàm lấy danh sách sản phẩm từ API
  */
 const getAllProduct = createAsyncThunk("product/getAllProduct", async () => {
-  const response = await axios.get(
-    "http://localhost:8080/api/v1/admin/products",
-    {
-      headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsZXZhbnRhbUBnbWFpbC5jb20iLCJpYXQiOjE3NTAwNzkyMjQsImV4cCI6MjY1MDA3OTIyNH0.aRNkcN9qIIiB2f6AX_5HEoCpGFvZ2m_ywwEt1VkNiqk",
-      },
-    }
-  );
+  const response = await axiosInstance.get("products");
 
   return response.data;
 });
@@ -21,18 +13,19 @@ const getAllProduct = createAsyncThunk("product/getAllProduct", async () => {
 const removeProduct = createAsyncThunk(
   "product/removeProduct",
   async (productId) => {
-    await axios.delete(
-      `http://localhost:8080/api/v1/admin/products/${productId}`,
-      {
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsZXZhbnRhbUBnbWFpbC5jb20iLCJpYXQiOjE3NTAwNzkyMjQsImV4cCI6MjY1MDA3OTIyNH0.aRNkcN9qIIiB2f6AX_5HEoCpGFvZ2m_ywwEt1VkNiqk",
-        },
-      }
-    );
+    await axiosInstance.delete(`products/${productId}`);
     // Giá trị mà sau này trong slice sẽ nhận được thông qua action.payload
     return productId;
   }
 );
 
-export { getAllProduct, removeProduct };
+const createProduct = createAsyncThunk(
+  "product/createProduct",
+  async (productData) => {
+    const response = await axiosInstance.post("products", productData);
+
+    return response.data;
+  }
+);
+
+export { getAllProduct, removeProduct, createProduct };

@@ -8,9 +8,9 @@ function App() {
   return (
     <>
       {/* <Counter /> */}
-      {/* <ListProduct /> */}
+      <ListProduct />
       {/* <UploadSingleFile /> */}
-      <UploadMultipleFile />
+      {/* <UploadMultipleFile /> */}
     </>
   );
 }
