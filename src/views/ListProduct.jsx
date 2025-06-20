@@ -4,6 +4,7 @@ import {
   createProduct,
   getAllProduct,
   removeProduct,
+  updateProduct,
 } from "../apis/product.api";
 import {
   Button,
@@ -16,14 +17,32 @@ import {
   Space,
   Table,
   Tag,
+  Upload,
 } from "antd";
 import { getAllCategory } from "../apis/category.api";
+import { UploadOutlined } from "@ant-design/icons";
+import { uploadToCloudinary } from "../utils/uploadFile";
 
 export default function ListProduct() {
   const dispatch = useDispatch();
   const [isShowModal, setIsShowModal] = useState(false);
   const { status, data, error } = useSelector((state) => state.product); // Lấy dữ liệu từ trong Store
   const [categories, setCategories] = useState([]);
+  const [productId, setProductId] = useState(null);
+  const [productInfo, setProductInfo] = useState(null);
+  const [form] = Form.useForm();
+  const [imageUrl, setImageUrl] = useState("");
+
+  useEffect(() => {
+    //  Fill dữ liệu của product vào trong Form
+    form.setFieldsValue({
+      ...productInfo,
+      categoryId: productInfo?.category?.id,
+    });
+
+    // Cho phép người dùng xem được image
+    setImageUrl(productInfo.image);
+  }, [productInfo, form]);
 
   useEffect(() => {
     dispatch(getAllProduct());
@@ -51,7 +70,11 @@ export default function ListProduct() {
 
   // Hàm mở modal thêm mới
   const handleShowModal = () => {
+    // Cập nhật state mở modal
     setIsShowModal(true);
+
+    // Cập nhật id của product về null
+    setProductId(null);
   };
 
   // Hàm đóng modal thêm mới
@@ -66,6 +89,18 @@ export default function ListProduct() {
       // Bắn dispatch vào trong Slice để xử lý
       dispatch(removeProduct(id));
     }
+  };
+
+  // Mở modal sửa sản phẩm
+  const handleShowModalEdit = (product) => {
+    // Cập nhật state mở modal
+    setIsShowModal(true);
+
+    // Cập nhật lại id của sản phẩm cần edit
+    setProductId(product.id);
+
+    // Cập nhật thông tin sản phẩm vào state productInfo
+    setProductInfo(product);
   };
 
   const columns = [
@@ -94,20 +129,40 @@ export default function ListProduct() {
     },
 
     {
+      width: 200,
       title: "Hành động",
       render: (_, record) => (
         <Space size="middle">
-          <Button>Sửa</Button>
+          <Button onClick={() => handleShowModalEdit(record)}>Sửa</Button>
           <Button onClick={() => handleShowModalDelete(record.id)}>Xóa</Button>
         </Space>
       ),
     },
   ];
 
-  const onFinish = async (values) => {
+  const props = {
+    beforeUpload: async (file) => {
+      const response = await uploadToCloudinary(file);
+
+      if (response) {
+        setImageUrl(response);
+      }
+
+      return response;
+    },
+    showUploadList: false,
+  };
+
+  const onFinish = (formValues) => {
+    const values = { ...formValues, image: imageUrl };
     try {
-      //  Bắn dispatch vào trong middleware để xử lý
-      await dispatch(createProduct(values)).unwrap(); // Trả về  nếu có lỗi
+      if (productId) {
+        // Bắn dispatch cập nhật
+        dispatch(updateProduct({ productId, values }));
+      } else {
+        //  Bắn dispatch thêm mới vào trong middleware để xử lý
+        dispatch(createProduct(values)).unwrap(); // Trả về  nếu có lỗi
+      }
 
       // Đóng modal thêm mới
       handleCloseModal();
@@ -124,11 +179,12 @@ export default function ListProduct() {
       <Modal
         onCancel={handleCloseModal}
         footer={null}
-        title="Thêm mới sản phẩm"
+        title={`${productId ? "Cập nhật" : "Thêm mới"} sản phẩm`}
         open={isShowModal}
       >
         <Form
-          name="basic"
+          form={form}
+          name="formProduct"
           layout="vertical"
           initialValues={{ remember: true }}
           onFinish={onFinish}
@@ -138,7 +194,23 @@ export default function ListProduct() {
             <Input />
           </Form.Item>
           <Form.Item label="Hình ảnh" name="image">
-            <Input />
+            <div className="flex items-center gap-2">
+              <div className="flex-1">
+                <Upload style={{ width: "100%" }} {...props}>
+                  <Button className="w-full" icon={<UploadOutlined />}>
+                    Tải hình ảnh lên
+                  </Button>
+                </Upload>
+              </div>
+              {imageUrl && (
+                <Image
+                  className="flex-1"
+                  src={imageUrl}
+                  height={50}
+                  width={50}
+                />
+              )}
+            </div>
           </Form.Item>
           <Form.Item label="Số lượng" name="quantity">
             <InputNumber style={{ width: "100%" }} />
@@ -170,8 +242,8 @@ export default function ListProduct() {
               >
                 Hủy
               </Button>
-              <Button type="primary" htmlType="submit">
-                Thêm
+              <Button disabled={!imageUrl} type="primary" htmlType="submit">
+                {productId ? "Lưu" : "Thêm"}
               </Button>
             </div>
           </Form.Item>

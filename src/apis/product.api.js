@@ -28,4 +28,19 @@ const createProduct = createAsyncThunk(
   }
 );
 
-export { getAllProduct, removeProduct, createProduct };
+const updateProduct = createAsyncThunk(
+  "product/updateProduct",
+  async (request) => {
+    const { productId, values } = request;
+
+    await axiosInstance.put(`products/${productId}`, values);
+
+    // Trả về 2 thông tin đẻ redux store cập nhật state
+    return {
+      id: productId,
+      product: values,
+    };
+  }
+);
+
+export { getAllProduct, removeProduct, createProduct, updateProduct };

@@ -3,6 +3,7 @@ import {
   createProduct,
   getAllProduct,
   removeProduct,
+  updateProduct,
 } from "../../apis/product.api";
 
 const initialState = {
@@ -40,6 +41,19 @@ const productSlice = createSlice({
     builder.addCase(createProduct.fulfilled, (state, action) => {
       // Cập nhật lại state
       state.data.unshift(action.payload);
+    });
+    // Cập nhật store sau khi chỉnh sửa sản phẩm
+    builder.addCase(updateProduct.fulfilled, (state, action) => {
+      // Lấy ra id và thông tin sản phẩm
+      const { id, product } = action.payload;
+
+      // Lấy ra vị trí của phần tử trong mảng theo id
+      const productIndex = state.data.findIndex((pro) => pro.id === id);
+
+      // Kiểm tra vị trí phần tử trong mảng, nếu khác -1 thì tiến hành cập nhật
+      if (productIndex !== -1) {
+        state.data[productIndex] = product;
+      }
     });
   },
 });
